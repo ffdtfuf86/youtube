@@ -7,12 +7,22 @@ let filterCount = 0; // Track filtered content
 // Configuration - Extension-only mode
 const EXTENSION_ID = chrome.runtime.id;
 
-// Load settings from extension storage
-chrome.storage.sync.get(['allowedChannelId', 'hasTemporaryAccess'], (result) => {
+// Load settings from extension storage with security checks
+chrome.storage.sync.get(['allowedChannelId', 'hasTemporaryAccess', 'extensionEnabled'], (result) => {
   allowedChannelId = result.allowedChannelId;
   hasTemporaryAccess = result.hasTemporaryAccess || false;
+  
+  // Security check - ensure extension is enabled
+  if (result.extensionEnabled === false && !hasTemporaryAccess) {
+    // Force re-enable if disabled without proper unlock
+    chrome.storage.sync.set({ extensionEnabled: true });
+  }
+  
   console.log('SecureYT: Loaded settings', { allowedChannelId, hasTemporaryAccess });
   filterContent();
+  
+  // Start aggressive monitoring for this tab
+  startAggressiveFiltering();
 });
 
 // Listen for storage changes
@@ -145,8 +155,13 @@ function filterContent() {
   }
 }
 
-// Block entire page for direct channel navigation
+// Block entire page for direct channel navigation with enhanced security
 function blockEntirePage() {
+  // Clear all existing content first to prevent any potential bypass
+  if (document.body) {
+    document.body.innerHTML = '';
+  }
+  
   const overlay = document.createElement('div');
   overlay.id = 'secureyt-page-overlay';
   overlay.innerHTML = `
@@ -166,6 +181,9 @@ function blockEntirePage() {
   `;
   
   document.body.appendChild(overlay);
+  
+  // Notify background script about direct navigation attempt
+  chrome.runtime.sendMessage({ action: 'blockDirectNavigation' });
 }
 
 // Inject security modal
@@ -355,7 +373,56 @@ new MutationObserver(() => {
   }
 }).observe(document, { subtree: true, childList: true });
 
+// Enhanced monitoring and filtering
+function startAggressiveFiltering() {
+  // More frequent filtering for dynamically loaded content
+  setInterval(filterContent, 1000);
+  
+  // Monitor for any attempts to modify our blocked overlays
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      // Check if our blocked overlays were removed
+      mutation.removedNodes.forEach((node) => {
+        if (node.className && node.className.includes('secureyt-blocked-content')) {
+          // Re-apply filtering if our blocks were removed
+          setTimeout(filterContent, 100);
+        }
+      });
+    });
+  });
+  
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  
+  // Prevent right-click and developer tools on blocked content
+  document.addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.secureyt-blocked-content') || e.target.closest('#secureyt-page-overlay')) {
+      e.preventDefault();
+      return false;
+    }
+  });
+  
+  // Prevent F12 and other developer tool shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+        (e.ctrlKey && e.key === 'U')) {
+      
+      chrome.storage.sync.get(['hasTemporaryAccess'], (result) => {
+        if (!result.hasTemporaryAccess) {
+          e.preventDefault();
+          alert('Developer tools are disabled while content filtering is active');
+          return false;
+        }
+      });
+    }
+  });
+}
+
 // Periodic content filtering for dynamically loaded content
 setInterval(filterContent, 2000);
 
-console.log('SecureYT: Content script loaded');
+console.log('SecureYT: Content script loaded with enhanced security');

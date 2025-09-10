@@ -85,8 +85,21 @@ function extractChannelIdFromUrl(url) {
   return null;
 }
 
-// Save settings
+// Save settings with enhanced security verification
 async function saveSettings() {
+  // Check if settings are locked (require additional verification)
+  const result = await chrome.storage.sync.get(['settingsLocked', 'securityPassword']);
+  
+  if (result.settingsLocked && result.securityPassword) {
+    const currentPassword = prompt('Enter your current security password to change settings:');
+    if (currentPassword !== result.securityPassword) {
+      alert('Invalid password. Settings change denied.');
+      return;
+    }
+    // Unlock settings temporarily
+    await chrome.storage.sync.set({ settingsLocked: false });
+  }
+  
   const channelUrl = document.getElementById('channel-url-input').value.trim();
   const channelName = document.getElementById('channel-name-input').value.trim();
   const password = document.getElementById('password-input').value.trim();
@@ -110,6 +123,12 @@ async function saveSettings() {
   if (!phone) {
     alert('Please enter your phone number');
     return;
+  }
+  
+  // Additional security check for suspicious changes
+  if (result.securityPassword && password !== result.securityPassword) {
+    const confirmChange = confirm('You are changing the security password. This will require re-verification. Continue?');
+    if (!confirmChange) return;
   }
   
   const channelId = extractChannelIdFromUrl(channelUrl);
@@ -136,6 +155,11 @@ async function saveSettings() {
     currentSettings = { ...currentSettings, ...settings };
     updateUI();
     
+    // Lock settings after successful change to prevent tampering
+    setTimeout(async () => {
+      await chrome.storage.sync.set({ settingsLocked: true });
+    }, 5000);
+    
     // Show success message
     const saveBtn = document.getElementById('save-settings');
     const originalText = saveBtn.textContent;
@@ -160,8 +184,11 @@ async function saveSettings() {
   }
 }
 
-// End temporary access
+// End temporary access with verification
 async function endTemporaryAccess() {
+  const confirmEnd = confirm('Are you sure you want to end temporary access? Content filtering will resume immediately.');
+  if (!confirmEnd) return;
+  
   try {
     // Update storage
     await chrome.storage.sync.set({ hasTemporaryAccess: false });
