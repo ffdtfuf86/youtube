@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureYT - Mobile</title>
+    <meta name="description" content="Secure YouTube content filtering with multi-factor authentication">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ef4444">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SecureYT">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="shield-icon">🛡️</span>
+                <h1>SecureYT</h1>
+            </div>
+            <button class="settings-btn" id="settingsBtn">⚙️</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Status Section -->
+        <section class="status-section">
+            <div class="status-card">
+                <div class="status-item">
+                    <div class="status-icon" id="filterStatus"></div>
+                    <span class="status-text">Content Filtering</span>
+                    <span class="status-value" id="filterStatusText">Active</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-icon" id="accessStatus"></div>
+                    <span class="status-text">Temporary Access</span>
+                    <span class="status-value" id="accessStatusText">Inactive</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Current Channel -->
+        <section class="channel-section" id="channelSection" style="display: none;">
+            <h2>Allowed Channel</h2>
+            <div class="channel-card">
+                <div class="channel-info">
+                    <div class="channel-name" id="channelName"></div>
+                    <div class="channel-url" id="channelUrl"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="actions-section">
+            <button class="action-btn primary" id="openYouTubeBtn">
+                📺 Open Filtered YouTube
+            </button>
+            <button class="action-btn secondary" id="unlockBtn">
+                🔓 Temporary Unlock
+            </button>
+            <button class="action-btn danger" id="endAccessBtn" style="display: none;">
+                ⏹️ End Access
+            </button>
+        </section>
+
+        <!-- Instructions -->
+        <section class="instructions-section">
+            <h3>How to Use</h3>
+            <div class="instruction-list">
+                <div class="instruction-item">
+                    <span class="step-number">1</span>
+                    <span class="step-text">Configure your allowed YouTube channel in settings</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="step-number">2</span>
+                    <span class="step-text">Tap "Open Filtered YouTube" to browse safely</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="step-number">3</span>
+                    <span class="step-text">Use "Temporary Unlock" when you need full access</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-btn" id="closeSettingsBtn">✕</button>
+            </div>
+            <div class="modal-content">
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label for="channelUrlInput">YouTube Channel URL</label>
+                        <input type="url" id="channelUrlInput" placeholder="https://youtube.com/channel/...">
+                    </div>
+                    <div class="form-group">
+                        <label for="channelNameInput">Channel Name</label>
+                        <input type="text" id="channelNameInput" placeholder="Channel display name">
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordInput">Security Password</label>
+                        <input type="password" id="passwordInput" placeholder="Set security password">
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneInput">Phone Number</label>
+                        <input type="tel" id="phoneInput" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="durationInput">Access Duration (minutes)</label>
+                        <select id="durationInput">
+                            <option value="15">15 minutes</option>
+                            <option value="30" selected>30 minutes</option>
+                            <option value="60">1 hour</option>
+                            <option value="120">2 hours</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="save-btn">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Modal -->
+    <div class="modal-overlay" id="securityModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Security Verification</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="step-indicator" id="stepIndicator">Step 1 of 3</span>
+            </div>
+            <div class="modal-content">
+                <!-- Step 1: Password -->
+                <div class="security-step" id="step1">
+                    <div class="step-icon">🔑</div>
+                    <h3>Enter Password</h3>
+                    <input type="password" id="securityPassword" placeholder="Your security password">
+                    <button class="verify-btn" id="verifyPasswordBtn">Continue</button>
+                </div>
+
+                <!-- Step 2: Phone -->
+                <div class="security-step" id="step2" style="display: none;">
+                    <div class="step-icon">📞</div>
+                    <h3>Phone Verification</h3>
+                    <p>Your verification word is:</p>
+                    <div class="verification-word" id="verificationWord"></div>
+                    <button class="verify-btn" id="confirmCallBtn">I See the Word</button>
+                </div>
+
+                <!-- Step 3: Voice -->
+                <div class="security-step" id="step3" style="display: none;">
+                    <div class="step-icon">🎤</div>
+                    <h3>Voice Verification</h3>
+                    <p>Type the verification word:</p>
+                    <input type="text" id="spokenWord" placeholder="Enter the word">
+                    <button class="verify-btn" id="verifyVoiceBtn">Complete Verification</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Install Prompt -->
+    <div class="install-prompt" id="installPrompt" style="display: none;">
+        <div class="install-content">
+            <span class="install-icon">📱</span>
+            <div class="install-text">
+                <strong>Install SecureYT</strong>
+                <p>Add to your home screen for the best experience</p>
+            </div>
+            <button class="install-btn" id="installBtn">Install</button>
+            <button class="dismiss-btn" id="dismissBtn">✕</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/security.js"></script>
+    <script src="js/youtube-filter.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => console.log('SW registered'))
+                .catch(error => console.log('SW registration failed'));
+        }
+    </script>
+</body>
+</html>
