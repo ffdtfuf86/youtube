@@ -4,9 +4,8 @@ let hasTemporaryAccess = false;
 let securityModalInjected = false;
 let filterCount = 0; // Track filtered content
 
-// Configuration
-const BACKEND_URL = 'http://localhost:5000';
-const USER_ID = 'user-1'; // In production, this would be from authentication
+// Configuration - Extension-only mode
+const EXTENSION_ID = chrome.runtime.id;
 
 // Load settings from extension storage
 chrome.storage.sync.get(['allowedChannelId', 'hasTemporaryAccess'], (result) => {
@@ -244,22 +243,15 @@ window.secureYTVerifyPassword = async function() {
     return;
   }
   
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/verify-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: USER_ID, password })
-    });
-    
-    if (response.ok) {
+  // Get stored password from extension storage
+  chrome.storage.sync.get(['securityPassword'], (result) => {
+    if (result.securityPassword === password) {
       showStep(2);
       initiatePhoneVerification();
     } else {
       alert('Invalid password');
     }
-  } catch (error) {
-    alert('Verification failed. Please try again.');
-  }
+  });
 };
 
 window.secureYTConfirmCall = function() {
@@ -278,54 +270,54 @@ window.secureYTToggleRecording = function() {
 };
 
 window.secureYTVerifyVoice = async function() {
-  const spokenWord = document.getElementById('secureyt-spoken-word').value;
+  const spokenWord = document.getElementById('secureyt-spoken-word').value.toLowerCase().trim();
   if (!spokenWord) {
     alert('Please enter the word you spoke');
     return;
   }
   
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/verify-voice`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: USER_ID, spokenWord })
-    });
+  // Get the verification word from storage
+  chrome.storage.local.get(['currentVerificationWord'], (result) => {
+    const expectedWord = result.currentVerificationWord?.toLowerCase().trim();
     
-    if (response.ok) {
-      const data = await response.json();
-      alert(`Access granted for ${data.duration} minutes!`);
-      
-      // Update storage to enable temporary access
-      chrome.storage.sync.set({ hasTemporaryAccess: true });
-      
-      // Close modal and refresh page
-      window.secureYTCloseModal();
-      location.reload();
+    if (spokenWord === expectedWord) {
+      chrome.storage.sync.get(['temporaryAccessDuration'], (settings) => {
+        const duration = settings.temporaryAccessDuration || 30;
+        alert(`Access granted for ${duration} minutes!`);
+        
+        // Enable temporary access and set timer
+        chrome.runtime.sendMessage({
+          action: 'setTemporaryAccess',
+          duration: duration
+        });
+        
+        // Close modal and refresh page
+        window.secureYTCloseModal();
+        location.reload();
+      });
     } else {
       alert('Voice verification failed. Please try again.');
     }
-  } catch (error) {
-    alert('Verification failed. Please try again.');
-  }
+  });
 };
 
 async function initiatePhoneVerification() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/verify-phone`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: USER_ID })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      document.getElementById('secureyt-verification-word').textContent = data.verificationWord;
-    } else {
-      alert('Phone verification failed');
-    }
-  } catch (error) {
-    alert('Phone verification failed');
-  }
+  // Generate a random verification word
+  const words = ['SECURE', 'VERIFY', 'ACCESS', 'UNLOCK', 'CONFIRM', 'GUARD', 'SHIELD', 'TRUST', 'SAFE', 'CHECK'];
+  const verificationWord = words[Math.floor(Math.random() * words.length)];
+  
+  // Store the word for voice verification
+  chrome.storage.local.set({ currentVerificationWord: verificationWord });
+  
+  // Display the word
+  document.getElementById('secureyt-verification-word').textContent = verificationWord;
+  
+  // Simulate phone call notification
+  chrome.runtime.sendMessage({
+    action: 'showNotification',
+    title: 'SecureYT Phone Verification',
+    message: `Your verification word is: ${verificationWord}`
+  });
 }
 
 function showStep(stepNumber) {

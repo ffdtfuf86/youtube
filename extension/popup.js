@@ -1,7 +1,6 @@
 // SecureYT Popup Script - Enhanced settings management
 
-const BACKEND_URL = 'http://localhost:5000';
-const USER_ID = 'user-1'; // Enhanced: Will be dynamic in production
+// Extension-only mode - no backend required
 
 let currentSettings = {};
 
@@ -130,17 +129,6 @@ async function saveSettings() {
   };
   
   try {
-    // Save to backend
-    const response = await fetch(`${BACKEND_URL}/api/settings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...settings, userId: USER_ID })
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to save to backend');
-    }
-    
     // Save to extension storage
     await chrome.storage.sync.set(settings);
     
@@ -168,29 +156,19 @@ async function saveSettings() {
     
   } catch (error) {
     console.error('Failed to save settings:', error);
-    alert('Failed to save settings. Make sure the backend server is running.');
+    alert('Failed to save settings.');
   }
 }
 
 // End temporary access
 async function endTemporaryAccess() {
   try {
-    // Call backend
-    const response = await fetch(`${BACKEND_URL}/api/end-temporary-access`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: USER_ID })
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to end access');
-    }
-    
     // Update storage
     await chrome.storage.sync.set({ hasTemporaryAccess: false });
     
-    // Clear any alarms
-    chrome.alarms.clear('temporaryAccessExpiry');
+    // Send message to background script
+    chrome.runtime.sendMessage({ action: 'endTemporaryAccess' });
+    
     
     // Update UI
     currentSettings.hasTemporaryAccess = false;

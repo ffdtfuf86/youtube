@@ -40,7 +40,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   }
 });
 
-// Listen for messages from content script
+// Listen for messages from content script and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'setTemporaryAccess') {
     // Set temporary access
@@ -83,6 +83,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse(settings);
     });
     return true; // Keep message channel open for async response
+  }
+  
+  if (request.action === 'showNotification') {
+    // Show notification for phone verification
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: request.title,
+      message: request.message
+    });
+    
+    sendResponse({ success: true });
   }
 });
 
