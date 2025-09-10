@@ -100,28 +100,53 @@ function createBlockedOverlay(originalElement) {
   return overlay;
 }
 
-// Filter YouTube content
+// Enhanced content filtering with comprehensive selectors
 function filterContent() {
   if (!allowedChannelId && !hasTemporaryAccess) return;
   
-  // Target different YouTube page layouts
+  // Comprehensive selectors for all YouTube layouts (updated for 2024)
   const selectors = [
-    // Home page video thumbnails
+    // Home page and feed
     'ytd-rich-item-renderer',
     'ytd-video-renderer',
     'ytd-compact-video-renderer',
+    'ytd-rich-grid-media',
+    'ytd-rich-section-renderer',
     
     // Search results
     'ytd-video-renderer',
     'ytd-channel-renderer',
+    'ytd-playlist-renderer',
+    'ytd-radio-renderer',
     
-    // Sidebar recommendations
+    // Sidebar and recommendations
     'ytd-compact-video-renderer',
     'ytd-watch-next-secondary-results-renderer ytd-compact-video-renderer',
+    'ytd-compact-radio-renderer',
+    'ytd-compact-playlist-renderer',
     
     // Channel pages
     'ytd-grid-video-renderer',
-    'ytd-rich-grid-media'
+    'ytd-rich-grid-media',
+    'ytd-grid-channel-renderer',
+    
+    // Shorts and new formats
+    'ytd-reel-item-renderer',
+    'ytd-rich-shelf-renderer',
+    'ytd-continuation-item-renderer',
+    
+    // Comments and community posts
+    'ytd-comment-thread-renderer',
+    'ytd-backstage-post-thread-renderer',
+    
+    // Live streams and premieres
+    'ytd-live-chat-frame',
+    'ytd-video-primary-info-renderer',
+    
+    // Mobile-responsive elements
+    '[data-context-item-id]',
+    '.ytd-video-meta-block',
+    '.ytd-channel-name'
   ];
   
   selectors.forEach(selector => {
@@ -142,15 +167,50 @@ function filterContent() {
     });
   });
   
-  // Block direct navigation to unauthorized channels
-  if (window.location.pathname.startsWith('/channel/') || 
-      window.location.pathname.startsWith('/@') ||
-      window.location.pathname.startsWith('/c/') ||
-      window.location.pathname.startsWith('/user/')) {
+  // Enhanced blocking for various YouTube pages
+  const currentPath = window.location.pathname;
+  const currentUrl = window.location.href;
+  
+  // Block unauthorized channel pages
+  if (currentPath.startsWith('/channel/') || 
+      currentPath.startsWith('/@') ||
+      currentPath.startsWith('/c/') ||
+      currentPath.startsWith('/user/')) {
     
     const currentChannelId = extractChannelId(document);
     if (currentChannelId && shouldBlockContent(document)) {
       blockEntirePage();
+      return;
+    }
+  }
+  
+  // Block unauthorized individual videos
+  if (currentPath.startsWith('/watch') && currentUrl.includes('v=')) {
+    // Check if video is from unauthorized channel
+    const channelElements = document.querySelectorAll('a[href*="/channel/"], a[href*="/@"], a[href*="/c/"], a[href*="/user/"]');
+    for (const element of channelElements) {
+      if (shouldBlockContent(element.parentElement)) {
+        blockEntirePage();
+        return;
+      }
+    }
+  }
+  
+  // Block Shorts from unauthorized channels
+  if (currentPath.startsWith('/shorts/')) {
+    const currentChannelId = extractChannelId(document);
+    if (currentChannelId && shouldBlockContent(document)) {
+      blockEntirePage();
+      return;
+    }
+  }
+  
+  // Additional security: Block access to unauthorized playlists
+  if (currentPath.startsWith('/playlist') || currentUrl.includes('list=')) {
+    const playlistOwner = document.querySelector('[data-context-item-id]');
+    if (playlistOwner && shouldBlockContent(playlistOwner)) {
+      blockEntirePage();
+      return;
     }
   }
 }
