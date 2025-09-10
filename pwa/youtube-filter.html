@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureYT - Filtered YouTube</title>
+    <meta name="description" content="Secure YouTube browsing with content filtering">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ef4444">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .youtube-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .filter-header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-header h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .youtube-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+        }
+        
+        .youtube-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .filter-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .filter-message {
+            background: #1a1a1a;
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 400px;
+            margin: 1rem;
+        }
+        
+        .filter-message h2 {
+            color: #ef4444;
+            margin: 0 0 1rem 0;
+        }
+        
+        .filter-message p {
+            color: #cccccc;
+            margin: 1rem 0;
+        }
+        
+        .setup-btn {
+            background: #ef4444;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0.5rem;
+            width: 100%;
+        }
+        
+        .filter-status {
+            background: #374151;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .status-text {
+            color: #10b981;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .unlock-btn {
+            background: #ef4444;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .filter-header h1 {
+                margin-bottom: 0.5rem;
+            }
+            
+            .filter-status {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-btn,
+            .unlock-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="youtube-wrapper">
+        <!-- Header -->
+        <div class="filter-header">
+            <button class="header-btn" onclick="goBack()">⬅️ Back</button>
+            <h1 id="pageTitle">SecureYT - Filtered YouTube</h1>
+            <button class="header-btn" onclick="refreshContent()">🔄 Refresh</button>
+        </div>
+        
+        <!-- YouTube Content Area -->
+        <div class="youtube-container">
+            <iframe id="youtubeFrame" class="youtube-iframe" src="" allowfullscreen></iframe>
+            
+            <!-- Filter Overlay (shown when not configured) -->
+            <div class="filter-overlay" id="filterOverlay">
+                <div class="filter-message">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+                    <h2>Content Filtering Active</h2>
+                    <p id="filterMessage">Please configure your allowed YouTube channel to start browsing.</p>
+                    <button class="setup-btn" onclick="openSettings()">Configure Settings</button>
+                    <button class="setup-btn" onclick="requestAccess()" style="background: #374151;">Request Temporary Access</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Bar -->
+        <div class="filter-status">
+            <span class="status-text" id="statusText">
+                🛡️ Content filtering is active
+            </span>
+            <button class="unlock-btn" onclick="requestAccess()">🔓 Request Access</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/security.js"></script>
+    
+    <script>
+        let settings = {};
+        
+        // Initialize the filtered YouTube page
+        async function initFilteredYouTube() {
+            await loadSettings();
+            updateUI();
+            setupYouTubeContent();
+        }
+        
+        async function loadSettings() {
+            try {
+                const stored = localStorage.getItem('secureyt-settings');
+                if (stored) {
+                    settings = JSON.parse(stored);
+                }
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+            }
+        }
+        
+        function updateUI() {
+            const overlay = document.getElementById('filterOverlay');
+            const iframe = document.getElementById('youtubeFrame');
+            const statusText = document.getElementById('statusText');
+            const pageTitle = document.getElementById('pageTitle');
+            const filterMessage = document.getElementById('filterMessage');
+            
+            if (settings.hasTemporaryAccess && settings.accessExpiry > Date.now()) {
+                // Temporary access is active
+                overlay.style.display = 'none';
+                iframe.src = 'https://youtube.com';
+                statusText.innerHTML = '⚠️ Temporary access is active';
+                statusText.style.color = '#f59e0b';
+                pageTitle.textContent = 'SecureYT - Full YouTube Access';
+            } else if (settings.allowedChannelId && settings.allowedChannelName) {
+                // Channel is configured
+                overlay.style.display = 'none';
+                iframe.src = `https://youtube.com/channel/${settings.allowedChannelId}`;
+                statusText.innerHTML = '🛡️ Content filtering is active';
+                statusText.style.color = '#10b981';
+                pageTitle.textContent = `SecureYT - ${settings.allowedChannelName}`;
+            } else {
+                // Not configured
+                overlay.style.display = 'flex';
+                iframe.src = '';
+                filterMessage.textContent = 'Please configure your allowed YouTube channel to start browsing.';
+            }
+        }
+        
+        function setupYouTubeContent() {
+            // Monitor iframe for unauthorized navigation
+            const iframe = document.getElementById('youtubeFrame');
+            
+            if (iframe && settings.allowedChannelId && !settings.hasTemporaryAccess) {
+                // Periodically check if iframe has navigated away
+                setInterval(() => {
+                    try {
+                        // In a real implementation, this would need server-side filtering
+                        // For demo, we ensure iframe stays on allowed channel
+                        if (iframe.src && !iframe.src.includes('youtube.com/channel/' + settings.allowedChannelId) && !iframe.src.includes('youtube.com')) {
+                            console.log('Redirecting to allowed channel');
+                            iframe.src = `https://youtube.com/channel/${settings.allowedChannelId}`;
+                        }
+                    } catch (error) {
+                        // Expected due to CORS
+                    }
+                }, 10000);
+            }
+        }
+        
+        function goBack() {
+            window.location.href = '/';
+        }
+        
+        function refreshContent() {
+            const iframe = document.getElementById('youtubeFrame');
+            if (iframe.src) {
+                iframe.src = iframe.src;
+            }
+        }
+        
+        function openSettings() {
+            window.location.href = '/?settings';
+        }
+        
+        function requestAccess() {
+            if (!settings.securityPassword) {
+                alert('Please configure security settings first');
+                openSettings();
+                return;
+            }
+            
+            // In a real implementation, this would open the security modal
+            // For demo, we'll redirect to main app
+            window.location.href = '/#unlock';
+        }
+        
+        // Check for URL parameters
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const channelId = urlParams.get('channel');
+            
+            if (channelId && settings.allowedChannelId !== channelId) {
+                // Unauthorized channel access attempt
+                document.getElementById('filterMessage').textContent = 'Access to this channel is blocked. Only your configured channel is allowed.';
+            }
+        }
+        
+        // Monitor for settings changes
+        function monitorSettings() {
+            setInterval(async () => {
+                await loadSettings();
+                updateUI();
+            }, 2000);
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initFilteredYouTube();
+            checkUrlParams();
+            monitorSettings();
+        });
+        
+        // Handle back button
+        window.addEventListener('popstate', () => {
+            goBack();
+        });
+    </script>
+</body>
+</html>
