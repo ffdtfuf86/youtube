@@ -7,7 +7,9 @@
     "activeTab",
     "storage",
     "background",
-    "notifications"
+    "notifications",
+    "webNavigation",
+    "tabs"
   ],
   "host_permissions": [
     "*://*.youtube.com/*",
