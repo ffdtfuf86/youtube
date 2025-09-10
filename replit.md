@@ -1,6 +1,6 @@
 # Overview
 
-SecureYT is an enhanced security-focused YouTube video management application that provides controlled access to specific YouTube channels through multi-factor authentication. The application allows users to configure approved YouTube channels and implements a multi-step verification process (password + phone verification + voice verification) to grant temporary access to channel content. It's built as a full-stack application with a React frontend and Express backend, using PostgreSQL for data persistence.
+SecureYT is a Chrome extension that provides enhanced security-focused YouTube content filtering. The extension allows users to configure approved YouTube channels and implements a multi-step verification process (password + phone verification + voice verification) to grant temporary access to all content. It's built as a standalone Chrome extension that requires no external backend or database.
 
 # User Preferences
 
@@ -8,58 +8,51 @@ Preferred communication style: Simple, everyday language.
 
 # System Architecture
 
-## Frontend Architecture
-- **Framework**: React with TypeScript using Vite as the build tool
-- **UI Library**: Shadcn/ui components built on Radix UI primitives for accessible, customizable components
-- **Styling**: Tailwind CSS with a custom dark theme and CSS variables for theming
-- **State Management**: TanStack Query (React Query) for server state management and caching
-- **Routing**: Wouter for lightweight client-side routing
-- **Form Handling**: React Hook Form with Zod validation for type-safe form management
+## Chrome Extension Architecture
+- **Extension Type**: Manifest V3 Chrome extension with service worker
+- **Content Scripts**: JavaScript injected into YouTube pages for real-time content filtering
+- **Background Service Worker**: Manages alarms, notifications, and extension state
+- **Popup Interface**: HTML/CSS/JavaScript settings panel accessible from browser toolbar
+- **Storage**: Chrome's built-in sync storage for user settings and configuration
+- **Permissions**: Active tab, storage, background, and notifications permissions
 
-## Backend Architecture
-- **Framework**: Express.js with TypeScript for the REST API server
-- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
-- **Authentication**: Session-based authentication with bcrypt for password hashing
-- **API Design**: RESTful API endpoints for user management, settings, video data, and security verification
-- **Storage Interface**: Abstract storage interface pattern allowing for both in-memory (development) and database (production) implementations
-
-## Database Schema
-- **Users Table**: Stores user credentials (id, username, hashed password)
-- **Settings Table**: User-specific configuration including allowed channel details, security settings, and phone numbers
-- **Temporary Access Table**: Manages time-limited access tokens with verification words
-- **Videos Table**: Caches YouTube video metadata for approved channels
+## Extension Components
+- **manifest.json**: Extension configuration and permissions
+- **background.js**: Service worker handling timers, notifications, and inter-component communication  
+- **content.js**: Content script for YouTube page modification and security modal injection
+- **popup.html/popup.js**: Settings interface for channel configuration and security setup
+- **content.css**: Styling for blocked content overlays and security modals
 
 ## Security Architecture
 - **Multi-Factor Authentication**: Three-layer verification system
-  1. Password verification against stored hash
-  2. Phone verification via SMS (Twilio integration)
-  3. Voice verification with random verification words
-- **Temporary Access**: Time-limited access tokens with configurable duration
-- **Channel Restrictions**: Users can only access videos from pre-approved YouTube channels
+  1. Password verification against extension-stored credentials
+  2. Phone verification via browser notifications (simulated)
+  3. Voice verification with randomly generated verification words
+- **Temporary Access**: Time-limited access with automatic expiration using Chrome alarms
+- **Channel Restrictions**: Real-time content filtering blocks all YouTube content except approved channels
+- **Local Storage**: All security settings stored locally in Chrome's secure sync storage
 
 ## Data Flow
-- Users configure approved YouTube channels and security settings
-- Video data is fetched from YouTube API and cached in the database
-- Access requests trigger the multi-step verification process
-- Successful verification grants temporary access to cached video content
-- Videos are displayed in a grid layout with embedded YouTube player
+- Users configure approved YouTube channels and security settings via extension popup
+- Content script monitors YouTube pages and filters content in real-time
+- Access requests trigger the multi-step verification modal overlay
+- Successful verification grants temporary access with automatic timer expiration
+- Background service worker manages notifications and access expiration
 
 # External Dependencies
 
-## Third-Party Services
-- **YouTube Data API v3**: For fetching channel video metadata and content
-- **Twilio**: SMS service for phone number verification during security challenges
-- **Neon Database**: Serverless PostgreSQL hosting (indicated by @neondatabase/serverless dependency)
+## Browser APIs
+- **Chrome Extension APIs**: Storage, alarms, notifications, tabs, and runtime APIs
+- **Web APIs**: DOM manipulation, content script injection, message passing
+- **YouTube DOM**: Real-time content filtering by analyzing YouTube's page structure
 
-## Key Libraries
-- **Database**: Drizzle ORM with PostgreSQL adapter for type-safe database operations
-- **Authentication**: bcrypt for secure password hashing
-- **UI Components**: Extensive Radix UI component library for accessible primitives
-- **Validation**: Zod for runtime type validation and schema definitions
-- **HTTP Client**: Native fetch API wrapped in custom query client
-- **Development**: Vite with React plugin and Replit-specific tooling for cloud development
+## No External Services Required
+- **Self-Contained**: All functionality runs within the browser extension
+- **Local Storage**: Uses Chrome's built-in sync storage for all data persistence
+- **Simulated Verification**: Phone verification uses browser notifications instead of SMS
+- **No Backend**: Completely standalone with no server dependencies
 
-## API Integrations
-- **YouTube API**: Requires API key for accessing channel and video data
-- **Twilio SMS**: Requires account SID, auth token, and phone number for SMS verification
-- **PostgreSQL**: Requires database URL for connection (configured via environment variables)
+## Installation Requirements
+- **Chrome Browser**: Requires Google Chrome or Chromium-based browser
+- **Developer Mode**: Must enable Chrome extension developer mode for installation
+- **Permissions**: Users must grant extension permissions for YouTube access and notifications
