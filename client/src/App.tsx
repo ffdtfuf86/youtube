@@ -17,7 +17,7 @@ function Router() {
 
 function App() {
   return (
-    <div className="dark">
+    <div className="dark min-h-screen">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

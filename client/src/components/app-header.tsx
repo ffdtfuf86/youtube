@@ -12,7 +12,7 @@ export default function AppHeader({ onShowSettings }: AppHeaderProps) {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
             <Shield className="text-primary text-2xl" data-testid="icon-logo" />
-            <h1 className="text-2xl font-bold text-foreground" data-testid="text-app-title">
+            <h1 className="text-2xl font-bold text-foreground tracking-wide" data-testid="text-app-title">
               SecureYT
             </h1>
           </div>

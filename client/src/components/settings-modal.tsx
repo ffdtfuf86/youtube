@@ -113,8 +113,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" data-testid="modal-settings">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-xl font-bold text-card-foreground" data-testid="text-settings-title">
+        <DialogHeader className="flex flex-row items-center justify-between mb-2">
+          <DialogTitle className="text-xl font-bold text-card-foreground tracking-wide" data-testid="text-settings-title">
             Settings
           </DialogTitle>
           <Button 

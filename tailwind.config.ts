@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+// Enhanced: Tailwind configuration for SecureYT
 export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],

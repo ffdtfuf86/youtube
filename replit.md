@@ -1,6 +1,6 @@
 # Overview
 
-SecureYT is a security-focused YouTube video management application that provides controlled access to specific YouTube channels through multi-factor authentication. The application allows users to configure approved YouTube channels and implements a multi-step verification process (password + phone verification + voice verification) to grant temporary access to channel content. It's built as a full-stack application with a React frontend and Express backend, using PostgreSQL for data persistence.
+SecureYT is an enhanced security-focused YouTube video management application that provides controlled access to specific YouTube channels through multi-factor authentication. The application allows users to configure approved YouTube channels and implements a multi-step verification process (password + phone verification + voice verification) to grant temporary access to channel content. It's built as a full-stack application with a React frontend and Express backend, using PostgreSQL for data persistence.
 
 # User Preferences
 

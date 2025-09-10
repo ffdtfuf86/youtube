@@ -68,6 +68,8 @@ export class MemStorage implements IStorage {
       ...insertSettings,
       id,
       securityPassword: hashedPassword,
+      voiceVerificationEnabled: insertSettings.voiceVerificationEnabled ?? true,
+      temporaryAccessDuration: insertSettings.temporaryAccessDuration ?? 30,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -94,6 +96,7 @@ export class MemStorage implements IStorage {
     const access: TemporaryAccess = {
       ...insertAccess,
       id,
+      isActive: insertAccess.isActive ?? true,
       createdAt: new Date(),
     };
     this.temporaryAccess.set(id, access);
@@ -122,7 +125,15 @@ export class MemStorage implements IStorage {
 
   async saveVideos(videos: InsertVideo[]): Promise<void> {
     videos.forEach(video => {
-      const videoWithTimestamp: Video = { ...video, createdAt: new Date() };
+      const videoWithTimestamp: Video = { 
+        ...video, 
+        duration: video.duration ?? null,
+        description: video.description ?? null,
+        thumbnailUrl: video.thumbnailUrl ?? null,
+        viewCount: video.viewCount ?? null,
+        publishedAt: video.publishedAt ?? null,
+        createdAt: new Date() 
+      };
       this.videos.set(video.id, videoWithTimestamp);
     });
   }

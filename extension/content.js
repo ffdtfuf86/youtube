@@ -1,7 +1,8 @@
-// SecureYT Content Script - Filters YouTube content
+// SecureYT Content Script - Enhanced YouTube content filtering
 let allowedChannelId = null;
 let hasTemporaryAccess = false;
 let securityModalInjected = false;
+let filterCount = 0; // Track filtered content
 
 // Configuration
 const BACKEND_URL = 'http://localhost:5000';

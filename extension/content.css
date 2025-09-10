@@ -10,6 +10,7 @@
   position: relative;
   min-height: 200px;
   margin: 8px 0;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
 }
 
 .secureyt-block-message {

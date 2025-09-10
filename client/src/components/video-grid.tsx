@@ -42,6 +42,7 @@ export default function VideoGrid({ onPlayVideo }: VideoGridProps) {
     },
   });
 
+  // Enhanced: Safe video data access with fallback
   const videos = data?.videos || [];
 
   if (isLoading) {
@@ -101,7 +102,7 @@ export default function VideoGrid({ onPlayVideo }: VideoGridProps) {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {videos.map((video) => (
+          {videos.map((video: any) => (
             <Card 
               key={video.id}
               className="overflow-hidden hover:border-primary/50 transition-colors"

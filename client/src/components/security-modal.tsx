@@ -144,7 +144,7 @@ export default function SecurityModal({ isOpen, onClose }: SecurityModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-md mx-4" data-testid="modal-security">
+      <DialogContent className="w-full max-w-md mx-4 border-primary/20" data-testid="modal-security">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-card-foreground mb-2" data-testid="text-modal-title">
             Security Verification

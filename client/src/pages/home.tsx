@@ -8,6 +8,7 @@ import SettingsModal from "@/components/settings-modal";
 import VideoPlayer from "@/components/video-player";
 
 export default function Home() {
+  // Enhanced: State management for modals and video playback
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);

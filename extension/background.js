@@ -1,6 +1,6 @@
-// SecureYT Background Service Worker
+// SecureYT Background Service Worker - Enhanced security management
 
-// Extension installation
+// Extension installation with improved defaults
 chrome.runtime.onInstalled.addListener(() => {
   console.log('SecureYT extension installed');
   

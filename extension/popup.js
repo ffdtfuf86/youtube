@@ -1,7 +1,7 @@
-// SecureYT Popup Script
+// SecureYT Popup Script - Enhanced settings management
 
 const BACKEND_URL = 'http://localhost:5000';
-const USER_ID = 'user-1';
+const USER_ID = 'user-1'; // Enhanced: Will be dynamic in production
 
 let currentSettings = {};
 

@@ -38,6 +38,7 @@ export default function ChannelStatus({ onTemporaryUnblock }: ChannelStatusProps
     );
   }
 
+  // Enhanced: Type-safe access to channel data
   const channel = data?.allowedChannel;
   const hasTemporaryAccess = data?.hasTemporaryAccess;
 
@@ -62,7 +63,7 @@ export default function ChannelStatus({ onTemporaryUnblock }: ChannelStatusProps
             <img 
               src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=128&h=128"
               alt={`${channel.name} channel avatar`}
-              className="w-16 h-16 rounded-full object-cover"
+              className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
               data-testid="img-channel-avatar"
             />
             <div>

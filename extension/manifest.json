@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "SecureYT - YouTube Channel Blocker",
-  "version": "1.0",
-  "description": "Secure YouTube content filtering with multi-layer authentication",
+  "version": "1.0.1",
+  "description": "Advanced YouTube content filtering with multi-layer authentication system",
   "permissions": [
     "activeTab",
     "storage",

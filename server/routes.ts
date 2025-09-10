@@ -41,7 +41,7 @@ async function fetchYouTubeChannelVideos(channelId: string) {
       videoUrl: `https://www.youtube.com/watch?v=${item.id.videoId}`,
       publishedAt: item.snippet.publishedAt,
       viewCount: "0", // Would need additional API call to get view count
-      duration: "0:00", // Would need additional API call to get duration
+      duration: "0:00" as string, // Enhanced: Would need additional API call to get duration
     })) || [];
   } catch (error) {
     console.error("Error fetching YouTube videos:", error);

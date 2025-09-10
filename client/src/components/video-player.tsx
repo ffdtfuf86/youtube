@@ -21,7 +21,7 @@ export default function VideoPlayer({ videoUrl, onClose }: VideoPlayerProps) {
 
   return (
     <Dialog open={!!videoUrl} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-full p-0" data-testid="modal-video-player">
+      <DialogContent className="max-w-4xl w-full p-0 bg-black/95" data-testid="modal-video-player">
         <div className="relative">
           <Button
             variant="ghost"
