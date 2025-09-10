@@ -9,11 +9,14 @@
     "background",
     "notifications",
     "webNavigation",
-    "tabs"
+    "tabs",
+    "management",
+    "browsingData"
   ],
   "host_permissions": [
     "*://*.youtube.com/*",
-    "*://*.googlevideo.com/*"
+    "*://*.googlevideo.com/*",
+    "chrome://extensions/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -23,6 +26,12 @@
       "matches": ["*://*.youtube.com/*"],
       "js": ["content.js"],
       "css": ["content.css"],
+      "run_at": "document_end",
+      "all_frames": true
+    },
+    {
+      "matches": ["chrome://extensions/*"],
+      "js": ["extension-protection.js"],
       "run_at": "document_end"
     }
   ],
@@ -40,5 +49,6 @@
       "resources": ["security-modal.html", "styles.css"],
       "matches": ["*://*.youtube.com/*"]
     }
-  ]
+  ],
+  "incognito": "spanning"
 }

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureYT - Incognito Blocked</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1b 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #ef4444;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .shield-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ef4444;
+        }
+        
+        h1 {
+            color: #ef4444;
+            margin: 1rem 0;
+            font-size: 2rem;
+        }
+        
+        .message {
+            color: #cccccc;
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .actions {
+            margin: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            min-width: 200px;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn.secondary {
+            background: #374151;
+        }
+        
+        .btn.secondary:hover {
+            background: #4b5563;
+        }
+        
+        .security-info {
+            background: #374151;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .security-info h3 {
+            color: #f59e0b;
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+        }
+        
+        .security-info ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .security-info li {
+            color: #d1d5db;
+            margin: 0.5rem 0;
+        }
+        
+        .footer {
+            margin-top: 2rem;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .shield-icon {
+                font-size: 3rem;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="shield-icon">🛡️</div>
+        
+        <h1>Incognito Mode Blocked</h1>
+        
+        <div class="message">
+            <p><strong>SecureYT has blocked access to this content in incognito mode.</strong></p>
+            <p>Incognito browsing is disabled for security reasons. This ensures all YouTube content filtering and monitoring remains active.</p>
+        </div>
+        
+        <div class="security-info">
+            <h3>🔒 Why is incognito blocked?</h3>
+            <ul>
+                <li>Incognito mode can bypass content filtering</li>
+                <li>Security monitoring is reduced in private browsing</li>
+                <li>Access tracking and temporary permissions don't work properly</li>
+                <li>It provides an easy way to circumvent restrictions</li>
+            </ul>
+        </div>
+        
+        <div class="actions">
+            <button class="btn" onclick="openNormalYouTube()">
+                🌐 Open YouTube in Normal Mode
+            </button>
+            
+            <button class="btn secondary" onclick="requestTemporaryAccess()">
+                🔓 Request Temporary Access
+            </button>
+            
+            <button class="btn secondary" onclick="openSettings()">
+                ⚙️ SecureYT Settings
+            </button>
+        </div>
+        
+        <div class="footer">
+            <p>SecureYT v1.0 - Advanced YouTube Security</p>
+            <p>To access YouTube, please use normal browsing mode or request temporary access through multi-factor authentication.</p>
+        </div>
+    </div>
+    
+    <script>
+        function openNormalYouTube() {
+            // Open YouTube in a new normal tab
+            chrome.tabs.create({
+                url: 'https://youtube.com',
+                active: true
+            });
+            
+            // Close current incognito tab
+            chrome.tabs.getCurrent((tab) => {
+                chrome.tabs.remove(tab.id);
+            });
+        }
+        
+        function requestTemporaryAccess() {
+            // Open extension popup in a new normal tab
+            chrome.tabs.create({
+                url: chrome.runtime.getURL('popup.html'),
+                active: true
+            });
+        }
+        
+        function openSettings() {
+            // Open extension options page
+            chrome.runtime.openOptionsPage();
+        }
+        
+        // Show additional warning after 5 seconds
+        setTimeout(() => {
+            const message = document.querySelector('.message');
+            const warning = document.createElement('div');
+            warning.style.cssText = `
+                background: rgba(239, 68, 68, 0.1);
+                border: 1px solid #ef4444;
+                border-radius: 6px;
+                padding: 1rem;
+                margin-top: 1rem;
+                color: #fca5a5;
+            `;
+            warning.innerHTML = `
+                <strong>⚠️ Security Notice:</strong> Attempting to bypass incognito blocking may result in additional security restrictions being applied.
+            `;
+            message.appendChild(warning);
+        }, 5000);
+        
+        // Track blocked attempts
+        chrome.storage.local.get(['incognitoBlockCount'], (result) => {
+            const count = (result.incognitoBlockCount || 0) + 1;
+            chrome.storage.local.set({ 
+                incognitoBlockCount: count,
+                lastIncognitoBlock: Date.now()
+            });
+            
+            if (count > 5) {
+                // Show additional warning for repeated attempts
+                const container = document.querySelector('.container');
+                const repeatedWarning = document.createElement('div');
+                repeatedWarning.style.cssText = `
+                    background: #7f1d1d;
+                    border: 2px solid #ef4444;
+                    border-radius: 8px;
+                    padding: 1rem;
+                    margin-top: 1rem;
+                    animation: pulse 2s infinite;
+                `;
+                repeatedWarning.innerHTML = `
+                    <h3 style="color: #ef4444; margin: 0 0 0.5rem 0;">🚨 Multiple Bypass Attempts Detected</h3>
+                    <p style="margin: 0; color: #fca5a5;">This is attempt #${count}. Continued bypass attempts are being logged.</p>
+                `;
+                container.appendChild(repeatedWarning);
+            }
+        });
+        
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { opacity: 1; }
+                50% { opacity: 0.7; }
+                100% { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
